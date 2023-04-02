@@ -5,29 +5,29 @@ import Sidebar from '../components/Sidebar';
 import UserPage from '../components/UserPage';
 import { client } from '../client';
 import Post from './Post';
-import {userQuery} from "../utils/data"
+import {userQuery} from "../utils/data.js"
 
 const Home = () => {
     const [toggleSidebar, setToggleSidebar] = useState(false);
-    const [user, setUser] = useState();
+    const [user, setUser] = useState(null);
 
 
-  const userInfo = localStorage.getItem('user') !== 'undefined' ? JSON.parse(localStorage.getItem('user')) : localStorage.clear();
+    const userInfo = localStorage.getItem('user') !== 'undefined' ? JSON.parse(localStorage.getItem('user')) : localStorage.clear();
 
-  useEffect(() => {
-    const query = userQuery(userInfo?.googleId);
+    useEffect(() => {
+      const query = userQuery(userInfo?.googleId);
 
-    client.fetch(query).then((data) => {
-      setUser(data[0]);
-    });
-  }, []);
+      client.fetch(query).then((data) => {
+        setUser(data[0]);
+      });
+    }, []);
 
   return (
     <div
     className='flex bg-black-50 md:flex-row flex-col h-screen transition-height duration-75 ease-out'
     >
       <div className="hidden md:flex h-screen flex-initial">
-    <Sidebar />
+    <Sidebar user={user && user} />
     </div>
     <div className="flex md:hidden flex-row">
     <div className="p-2 w-full flex flex-row justify-between items-center shadow-md">
@@ -37,7 +37,6 @@ const Home = () => {
     </Link>
     <Link to={`user-profile/${user?._id}`}>
     <img src={user?.image} alt="user-pic" className="w-9 h-9 rounded-full " />
-
     </Link>
     </div>
     {toggleSidebar && (
@@ -49,7 +48,12 @@ const Home = () => {
         </div>
         )}
     </div>
-
+    <div className="pb-2 flex-1 h-screen overflow-y-scroll" >
+        <Routes>
+            <Route path="user-profile.:userId" element={<UserPage />} />
+            <Route path='/*' element={<Post user={user && user}  />} />
+        </Routes>
+    </div>
     </div>
   )
 }
